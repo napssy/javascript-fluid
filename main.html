@@ -1,7 +1,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head>
 <title>Javascript fluid dynamics</title>
-<script language="javascript" type="text/javascript" src="pso.js"></script>
+<script language="javascript" type="text/javascript" src="fluid.js"></script>
 <script language="javascript" type="text/javascript">
 
 var ctx;
@@ -9,14 +9,42 @@ var image_data;
 var timer;
 var iteration = 0;
 
+var dt = 1;
+var diff = 100;
+
+function getRed(data)
+{
+    var ret = [];
+    for (var i=0; i < data.length; i+=4)
+    {
+        ret.push(data[i]);
+    }
+    return ret;
+}
+
+function fromRed(dst,data)
+{
+    for (var i=0; i < data.length; i++)
+    {
+        dst[4*i] = data[i];
+        dst[4*i + 1] = data[i];
+        dst[4*i + 2] = data[i];
+        dst[4*i + 3] = 255;
+    }
+}
+
 function run()
 {
-    update_pso(ctx);
-    fitness = eval_pso(ctx,image_data);
-    if (score)
-        score.innerHTML = iteration;
     iteration++;
-    timer = setTimeout(run, 10);
+    ///////////
+    var data = [];
+    diffuse(ctx.canvas.width, data, getRed(image_data), diff, dt);
+    var imgd = ctx.createImageData(size, size);
+    fromRed(imgd.data, data);
+    ctx.putImageData(imgd,0,0);
+    image_data = imgd.data;
+    ///////////
+    timer = setTimeout(run, 100);
 }
 
 function init()
