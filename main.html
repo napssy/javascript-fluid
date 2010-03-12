@@ -1,0 +1,65 @@
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<title>Javascript fluid dynamics</title>
+<script language="javascript" type="text/javascript" src="pso.js"></script>
+<script language="javascript" type="text/javascript">
+
+var ctx;
+var image_data;
+var timer;
+var iteration = 0;
+
+function run()
+{
+    update_pso(ctx);
+    fitness = eval_pso(ctx,image_data);
+    if (score)
+        score.innerHTML = iteration;
+    iteration++;
+    timer = setTimeout(run, 10);
+}
+
+function init()
+{
+    var img = document.getElementById("fluid_image");
+    var canvas = document.getElementById("fluid_canvas");
+    canvas.width = img.width;
+    canvas.height = img.height;
+    ctx = canvas.getContext("2d");
+    ctx.drawImage(img,0,0);
+    try
+    {
+        image_data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    }
+    catch(e)
+    {
+        try
+        {
+            netscape.security.PrivilegeManager.enablePrivilege("UniversalBrowserRead");
+        }
+        catch(ev){}
+        image_data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    }
+}
+
+function toggle()
+{
+    if (timer)
+    {
+        clearTimeout(timer);
+    }
+    else
+    {
+        setTimeout(run,10);
+    }
+}
+
+</script>
+</head>
+<body onload="init();">
+<img id="fluid_image" src="canvas.png" />
+<canvas id="fluid_canvas"></canvas><br />
+<button onclick="toggle();">Start/Stop</button><br />
+<div id="score"></div>
+</body>
+</html>
