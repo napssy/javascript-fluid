@@ -9,7 +9,7 @@ var image_data;
 var imageTimer;
 var fluidTimer;
 var iteration = 0;
-var iterative_steps = 5;
+var iterative_steps = 10;
 
 var hspeed = [];
 var vspeed = [];
@@ -19,9 +19,13 @@ b = [];
 var imgd;
 var size = 100;
 
-var dt = 0.1;
+var oldx,oldy;
+var radius = 100;
+dragging = false;
+
+var dt = 1;
 var diff = 0;
-var visc = 100;
+var visc = 10;
 
 function toFluid(data, r, g, b)
 {
@@ -30,8 +34,8 @@ function toFluid(data, r, g, b)
         r.push(data[i]);
         g.push(data[i+1]);
         b.push(data[i+2]);
-        hspeed.push(Math.random()-0.5);
-        vspeed.push(Math.random()-0.5);
+        hspeed.push(0);
+        vspeed.push(0);
     }
 }
 
@@ -91,6 +95,66 @@ function init()
         imgd = ctx.getImageData(0, 0, canvas.width, canvas.height);
     }
     toFluid(imgd.data, r, g, b);
+    canvas.addEventListener('mousemove', ev_mousemove, false);
+    canvas.addEventListener('mousedown', ev_mousedown, false);
+    canvas.addEventListener('mouseup', ev_mouseup, false);
+    toggle();
+}
+
+function ev_mousedown(ev)
+{
+//      // Get the mouse position relative to the canvas element.
+//      if (ev.layerX || ev.layerX == 0) { // Firefox
+//        oldx = ev.layerX;
+//        oldy = ev.layerY;
+//      } else if (ev.offsetX || ev.offsetX == 0) { // Opera
+//        oldx = ev.offsetX;
+//        oldy = ev.offsetY;
+//      }
+      dragging = true;
+}
+
+function ev_mouseup(ev)
+{
+    dragging = false;
+}
+
+function ev_mousemove(ev)
+{
+     var x, y;
+  // Get the mouse position relative to the canvas element.
+  if (ev.layerX || ev.layerX == 0) { // Firefox
+    x = ev.layerX;
+    y = ev.layerY;
+  } else if (ev.offsetX || ev.offsetX == 0) { // Opera
+    x = ev.offsetX;
+    y = ev.offsetY;
+  }
+  x = x - ev.target.offsetLeft;
+  y = y - ev.target.offsetTop;
+  
+  //calculate speeds
+  var speedx = x - (oldx || x);
+  var speedy = y - (oldy || y);
+  //update speeds
+  if (dragging)
+  for (var i = 0; i < size; i++)
+    for (var j = 0; j < size; j++)
+    {
+        var d = (x-i)*(x-i) + (y-j)*(y-j);
+        if (d < radius)
+        {
+            hspeed[ind(i,j)] += speedx/radius;
+            vspeed[ind(i,j)] += speedy/radius;
+        }
+    }
+
+  
+  //update old values
+  oldx = x;
+  oldy = y;
+  
+  return false;
 }
 
 function toggle()
