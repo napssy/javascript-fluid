@@ -6,45 +6,65 @@
 
 var ctx;
 var image_data;
-var timer;
+var imageTimer;
+var fluidTimer;
 var iteration = 0;
+var iterative_steps = 5;
 
-var dt = 1;
-var diff = 100;
+var hspeed = [];
+var vspeed = [];
+r = [];
+g = [];
+b = [];
+var imgd;
+var size = 100;
 
-function getRed(data)
+var dt = 0.1;
+var diff = 0;
+var visc = 100;
+
+function toFluid(data, r, g, b)
 {
-    var ret = [];
     for (var i=0; i < data.length; i+=4)
     {
-        ret.push(data[i]);
+        r.push(data[i]);
+        g.push(data[i+1]);
+        b.push(data[i+2]);
+        hspeed.push(Math.random()-0.5);
+        vspeed.push(Math.random()-0.5);
     }
-    return ret;
 }
 
-function fromRed(dst,data)
+function fromFluid(image_data, r, g, b)
 {
-    for (var i=0; i < data.length; i++)
+    for (var i=0; i < r.length; i++)
     {
-        dst[4*i] = data[i];
-        dst[4*i + 1] = data[i];
-        dst[4*i + 2] = data[i];
-        dst[4*i + 3] = 255;
+        image_data[4*i] = r[i];
+        image_data[4*i + 1] = g[i];
+        image_data[4*i + 2] = b[i];
+        image_data[4*i + 3] = 255;
     }
 }
 
-function run()
+function runImage()
+{
+    fromFluid(imgd.data, r, g, b);
+    ctx.putImageData(imgd,0,0);
+    imageTimer = setTimeout(runImage, 40);
+}
+
+function runFluid()
 {
     iteration++;
     ///////////
-    var data = [];
-    diffuse(ctx.canvas.width, data, getRed(image_data), diff, dt);
-    var imgd = ctx.createImageData(size, size);
-    fromRed(imgd.data, data);
-    ctx.putImageData(imgd,0,0);
-    image_data = imgd.data;
+        
+    compute_speeds( size, hspeed, vspeed, visc, dt );
+    compute_density( size, r, hspeed, vspeed, diff, dt );
+    compute_density( size, g, hspeed, vspeed, diff, dt );
+    compute_density( size, b, hspeed, vspeed, diff, dt );
+    
     ///////////
-    timer = setTimeout(run, 100);
+    fluidTimer = setTimeout(runFluid, 30);
 }
 
 function init()
@@ -53,11 +73,13 @@ function init()
     var canvas = document.getElementById("fluid_canvas");
     canvas.width = img.width;
     canvas.height = img.height;
+    size = Math.min( canvas.width, canvas.height);
+    
     ctx = canvas.getContext("2d");
     ctx.drawImage(img,0,0);
     try
     {
-        image_data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        imgd = ctx.getImageData(0, 0, canvas.width, canvas.height);
     }
     catch(e)
     {
@@ -66,26 +88,31 @@ function init()
             netscape.security.PrivilegeManager.enablePrivilege("UniversalBrowserRead");
         }
         catch(ev){}
-        image_data = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+        imgd = ctx.getImageData(0, 0, canvas.width, canvas.height);
     }
+    toFluid(imgd.data, r, g, b);
 }
 
 function toggle()
 {
-    if (timer)
+    if (fluidTimer || imageTimer)
     {
-        clearTimeout(timer);
+        clearTimeout(fluidTimer);
+        clearTimeout(imageTimer);
+        fluidTimer = null;
+        imageTimer = null;
     }
     else
     {
-        setTimeout(run,10);
+        fluidTimer = setTimeout(runFluid,10);
+        imageTimer = setTimeout(runImage,10);
     }
 }
 
 </script>
 </head>
 <body onload="init();">
-<img id="fluid_image" src="canvas.png" />
+<img id="fluid_image" src="canvas.png"/>
 <canvas id="fluid_canvas"></canvas><br />
 <button onclick="toggle();">Start/Stop</button><br />
 <div id="score"></div>
