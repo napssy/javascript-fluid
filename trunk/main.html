@@ -63,9 +63,9 @@ function runFluid()
     ///////////
         
     compute_speeds( size, hspeed, vspeed, visc, dt );
-    compute_density( size, r, hspeed, vspeed, diff, dt );
-    compute_density( size, g, hspeed, vspeed, diff, dt );
-    compute_density( size, b, hspeed, vspeed, diff, dt );
+    compute_densityes( size, r, g, b, hspeed, vspeed, diff, dt );
+//    compute_density( size, g, hspeed, vspeed, diff, dt );
+//    compute_density( size, b, hspeed, vspeed, diff, dt );
     
     ///////////
     fluidTimer = setTimeout(runFluid, 30);
@@ -80,7 +80,16 @@ function init()
     size = Math.min( canvas.width, canvas.height);
     
     ctx = canvas.getContext("2d");
-    ctx.drawImage(img,0,0);
+    if (0)
+        ctx.drawImage(img,0,0);
+    else
+    {
+        var lingrad = ctx.createLinearGradient(0,0,0,canvas.height);
+        lingrad.addColorStop(0,'red');  
+        lingrad.addColorStop(1,'blue');
+        ctx.fillStyle = lingrad;
+        ctx.fillRect(0,0,canvas.width,canvas.height);
+    }
     try
     {
         imgd = ctx.getImageData(0, 0, canvas.width, canvas.height);
