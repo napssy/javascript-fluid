@@ -25,7 +25,7 @@ dragging = false;
 
 var dt = 1;
 var diff = 0;
-var visc = 10;
+var visc = 1000;
 
 function toFluid(data, r, g, b)
 {
@@ -112,14 +112,6 @@ function init()
 
 function ev_mousedown(ev)
 {
-//      // Get the mouse position relative to the canvas element.
-//      if (ev.layerX || ev.layerX == 0) { // Firefox
-//        oldx = ev.layerX;
-//        oldy = ev.layerY;
-//      } else if (ev.offsetX || ev.offsetX == 0) { // Opera
-//        oldx = ev.offsetX;
-//        oldy = ev.offsetY;
-//      }
       dragging = true;
 }
 

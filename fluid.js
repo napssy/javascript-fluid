@@ -171,12 +171,12 @@ function project ( size, h_speed, v_speed)
         {
             div[ind(i,j)] = -0.5*h*(h_speed[ind(i+1,j)]-h_speed[ind(i-1,j)]+
                                     v_speed[ind(i,j+1)]-v_speed[ind(i,j-1)]);
-            p[ind(i,j)] = 0;
+            p[ind(i,j)] = div[ind(i,j)]/4;
         }
     }
     boundary(size,div, 0);
     boundary(size,p, 0);
-    for ( k = 0; k < iterative_steps; k++ )
+    for ( k = 0; k < iterative_steps - 1; k++ )
     {
         for ( i = 1; i < size -1; i++ )
         {
